@@ -1029,22 +1029,11 @@ function showTyping() {
 function removeTyping() { const e = document.getElementById('typing'); if (e) e.remove(); }
 
 const GEMINI_KEYS = [
-  'AIzaSyDnadksP_ffqO2Tbun6-Qbc8D8t2Iesjkk',
-  'AIzaSyA_hkNZiMpei4k4i1CrbqFMw_xU4Mikp3Y',
-  'AIzaSyC6DENkJHBhvQoBdeFyU4sZcBtb1v4Nu3c',
-  'AIzaSyAVmayMRS-qC6S_j4gpnFs4ONauGRC0Tbs',
-  'AIzaSyAz-StAHfE-8Z1zVVgdo8TvnEHL-HMDMUo',
-  'AIzaSyBPt7sokbydL3SFLSNoAsQNWRnDj2IVfTE'
+  'AIzaSyAHP591vOpPjXbu_C20sGm3mesDd5Pri9E'
 ];
 
-let geminiKeyIndex = (() => {
-  try {
-    const raw = localStorage.getItem('geminiKeyIndex');
-    const n = Number(raw);
-    if (Number.isFinite(n) && n >= 0) return Math.floor(n) % GEMINI_KEYS.length;
-  } catch (e) {}
-  return 0;
-})();
+let geminiKeyIndex = 0;
+try { localStorage.setItem('geminiKeyIndex', '0'); } catch (e) {}
 
 function geminiUrlForIndex(i) {
   const key = GEMINI_KEYS[i % GEMINI_KEYS.length];
