@@ -472,6 +472,7 @@
   .foot-bottom a:hover { text-decoration: underline; }
 
   /* ===== CHAT ===== */
+  #chat-toggle, #chat-win { display: none !important; }
   #chat-toggle {
     position: fixed; bottom: 20px; right: 20px; z-index: 1000;
     width: 52px; height: 52px; border-radius: 50%;
@@ -991,18 +992,23 @@ function toggleFaq(el) { el.classList.toggle('open'); }
 let chatOpen = false;
 const togBtn = document.getElementById('chat-toggle');
 
-togBtn.addEventListener('click', () => { chatOpen ? closeChat() : openChat(); });
+if (togBtn) {
+  togBtn.addEventListener('click', () => { chatOpen ? closeChat() : openChat(); });
+}
 
 function openChat() {
-  chatOpen = true;
-  document.getElementById('chat-win').classList.add('open');
-  togBtn.textContent = '✕';
-  setTimeout(() => document.getElementById('ch-input').focus(), 300);
+  if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+    window.Tawk_API.maximize();
+    return;
+  }
+  window.open('https://tawk.to/chat/69aec5927ac1721c39912d81/1jj9b7h1a', '_blank', 'noopener,noreferrer');
 }
 function closeChat() {
+  if (window.Tawk_API && typeof window.Tawk_API.minimize === 'function') {
+    window.Tawk_API.minimize();
+    return;
+  }
   chatOpen = false;
-  document.getElementById('chat-win').classList.remove('open');
-  togBtn.textContent = '💬';
 }
 function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
@@ -1070,6 +1076,16 @@ async function sendMsg() {
   const inp = document.getElementById('ch-input');
   const text = inp.value.trim();
   if (!text) return;
+  if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+    window.Tawk_API.maximize();
+    inp.value = '';
+    inp.style.height = 'auto';
+    return;
+  }
+  window.open('https://tawk.to/chat/69aec5927ac1721c39912d81/1jj9b7h1a', '_blank', 'noopener,noreferrer');
+  inp.value = '';
+  inp.style.height = 'auto';
+  return;
   inp.value = ''; inp.style.height = 'auto';
   document.getElementById('ch-send').disabled = true;
   addMsg(text, 'user');
@@ -1141,6 +1157,18 @@ async function sendMsg() {
   document.getElementById('ch-send').disabled = false;
   inp.focus();
 }
+</script>
+
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69aec5927ac1721c39912d81/1jj9b7h1a';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
 </script>
 </body>
 </html>
