@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SpellBook — Создавайте ассистентов на базе ИИ</title>
+<link rel="icon" href="data:,">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800&family=Golos+Text:wght@400;500;600&display=swap');
 
@@ -967,7 +968,7 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 /* ===== MENU ===== */
 let menuOpen = false;
 function toggleMenu() {
@@ -1105,9 +1106,18 @@ async function sendMsg() {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       const msg = String(err?.error?.message || '');
-      const isQuota = res.status === 429 || msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('limit');
+      const ml = msg.toLowerCase();
+      const isRotatable = (
+        res.status === 429
+        || res.status === 403
+        || ml.includes('quota')
+        || ml.includes('limit')
+        || ml.includes('leaked')
+        || ml.includes('invalid')
+        || ml.includes('permission')
+      );
       console.error('Gemini error:', err);
-      if (isQuota && GEMINI_KEYS.length > 1) {
+      if (isRotatable && GEMINI_KEYS.length > 1) {
         rotateGeminiKey();
         res = await doFetch();
         if (!res.ok) {
