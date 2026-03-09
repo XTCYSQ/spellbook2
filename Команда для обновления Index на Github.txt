@@ -1,0 +1,1 @@
+cd "D:\Sites for companys\spellbook" && git add . && git commit -m "update site" && git push

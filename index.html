@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpellBook — Создавайте ассистентов на базе ИИ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800&family=Golos+Text:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f0ece4;
+    --card-bg: #e8e3db;
+    --dark: #1a1a1a;
+    --text: #2d2d2d;
+    --muted: #6b6b6b;
+    --accent: #c8622a;
+    --white: #ffffff;
+    --border: #d5cfc6;
+    --tag-bg: #ddd8cf;
+    --nav-h: 60px;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Golos Text', sans-serif;
+    background: var(--bg); color: var(--text);
+    font-size: 15px; line-height: 1.6; overflow-x: hidden;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: sticky; top: 0; z-index: 200;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: var(--nav-h);
+  }
+  .logo {
+    font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700;
+    color: var(--dark); text-decoration: none; flex-shrink: 0;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 22px; list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none; color: var(--text);
+    font-size: 13px; font-weight: 500; white-space: nowrap; transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a.active { text-decoration: underline; }
+  .nav-links a.mkt { color: var(--accent); }
+  .nav-badge {
+    background: #e53e3e; color: white; font-size: 9px; font-weight: 700;
+    padding: 1px 5px; border-radius: 3px; text-transform: uppercase;
+    margin-left: 2px; vertical-align: middle;
+  }
+  .nav-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .btn-outline {
+    padding: 7px 16px; border: 1.5px solid var(--dark); background: transparent;
+    color: var(--dark); border-radius: 8px; cursor: pointer;
+    font-family: 'Golos Text', sans-serif; font-size: 13px; font-weight: 500;
+    transition: all .2s; white-space: nowrap;
+  }
+  .btn-outline:hover { background: var(--dark); color: white; }
+  .btn-primary {
+    padding: 7px 16px; background: var(--dark); color: white;
+    border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Golos Text', sans-serif; font-size: 13px; font-weight: 500;
+    transition: background .2s; white-space: nowrap;
+  }
+  .btn-primary:hover { background: #333; }
+
+  /* Burger */
+  .burger {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 6px; margin-left: 8px;
+  }
+  .burger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--dark); border-radius: 2px; transition: all .3s;
+  }
+  .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .burger.open span:nth-child(2) { opacity: 0; }
+  .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile drawer */
+  .mobile-menu {
+    display: none; position: fixed;
+    top: var(--nav-h); left: 0; right: 0; bottom: 0;
+    background: var(--bg); z-index: 150;
+    padding: 20px 20px 32px; flex-direction: column; gap: 0;
+    overflow-y: auto; border-top: 1px solid var(--border);
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    text-decoration: none; color: var(--text);
+    font-size: 16px; font-weight: 500;
+    padding: 14px 0; border-bottom: 1px solid var(--border); transition: color .2s;
+  }
+  .mobile-menu a:hover { color: var(--accent); }
+  .mobile-menu a.mkt { color: var(--accent); }
+  .mob-btns { display: flex; gap: 10px; margin-top: 20px; }
+  .mob-btns button { flex: 1; padding: 12px; font-size: 14px; }
+
+  /* ===== SECTIONS ===== */
+  .section-pad { padding: 56px 20px; }
+  .container { max-width: 1160px; margin: 0 auto; }
+
+  /* HERO */
+  .hero { padding: 56px 20px 48px; max-width: 1160px; margin: 0 auto; }
+  .hero h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(26px, 5vw, 52px); font-weight: 800;
+    line-height: 1.15; color: var(--dark); max-width: 680px; margin-bottom: 14px;
+  }
+  .hero > p { color: var(--muted); font-size: 15px; max-width: 460px; margin-bottom: 32px; }
+  .hero-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .hero-card {
+    background: var(--white); border-radius: 16px; padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .hero-tag {
+    display: inline-block; background: var(--tag-bg); color: var(--muted);
+    font-size: 10px; font-weight: 600; letter-spacing: .5px;
+    padding: 3px 10px; border-radius: 20px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .hero-card h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(14px, 2vw, 17px);
+    font-weight: 700; margin-bottom: 8px; color: var(--dark);
+  }
+  .hero-card p { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+  .btn-dark {
+    display: block; width: 100%; background: var(--dark); color: white;
+    border: none; border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 500;
+    cursor: pointer; text-align: center; font-family: 'Golos Text', sans-serif;
+    transition: background .2s; text-decoration: none;
+  }
+  .btn-dark:hover { background: #333; }
+  .btn-border {
+    display: block; width: 100%; background: transparent; color: var(--dark);
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 13px;
+    font-size: 14px; font-weight: 500; cursor: pointer; text-align: center;
+    font-family: 'Golos Text', sans-serif; transition: all .2s; text-decoration: none;
+  }
+  .btn-border:hover { border-color: var(--dark); }
+
+  /* MISSION */
+  .mission {
+    padding: 52px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .mission-top {
+    max-width: 1160px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;
+  }
+  .mission-top h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 28px);
+    font-weight: 700; line-height: 1.3; color: var(--dark);
+  }
+  .mission-top p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+  .feat3 {
+    max-width: 1160px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  .feat3-card {
+    border-radius: 18px; padding: 28px 22px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .feat3-card:nth-child(1) { background: #d4c9bb; }
+  .feat3-card:nth-child(2) { background: #b8cec5; }
+  .feat3-card:nth-child(3) { background: #c4cad9; }
+  .feat3-card .icon { font-size: 36px; margin-bottom: 4px; }
+  .feat3-card h3 {
+    font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 700; color: var(--dark);
+  }
+  .feat3-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* MARKETPLACE */
+  .mkt-wrap { border-top: 1px solid var(--border); }
+  .mkt-inner {
+    max-width: 1160px; margin: 0 auto; padding: 52px 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+  }
+  .mkt-inner h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 28px);
+    font-weight: 700; margin-bottom: 12px; color: var(--dark);
+  }
+  .mkt-inner > div > p { color: var(--muted); margin-bottom: 22px; font-size: 14px; }
+  .btn-black {
+    display: inline-flex; align-items: center;
+    background: var(--dark); color: white; padding: 12px 20px; border-radius: 10px;
+    text-decoration: none; font-size: 14px; font-weight: 500; transition: background .2s;
+  }
+  .btn-black:hover { background: #333; }
+  .stack { position: relative; height: 190px; }
+  .sc {
+    position: absolute; background: white; border-radius: 12px;
+    padding: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.1); width: 175px;
+  }
+  .sc:nth-child(1) { transform: rotate(-8deg); top: 18px; left: 0; }
+  .sc:nth-child(2) { transform: rotate(-2deg); top: 8px; left: 55px; }
+  .sc:nth-child(3) { transform: rotate(3deg); top: 0; left: 110px; }
+  .sc-h { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+  .sc-av {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .sc-t { font-size: 11px; font-weight: 600; }
+  .sc-b { font-size: 9px; background: #e8f4ef; color: #2d7a5f; padding: 1px 5px; border-radius: 4px; display: inline-block; }
+  .sc-d { font-size: 10px; color: var(--muted); margin-bottom: 5px; }
+  .sc-s { color: #f5a623; font-size: 10px; }
+
+  /* FEATURES */
+  .features-section { padding: 52px 20px; }
+  .features-section h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 32px);
+    font-weight: 700; text-align: center; margin-bottom: 36px; color: var(--dark);
+  }
+  .feat-grid {
+    max-width: 1160px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .fl {
+    background: var(--white); border-radius: 18px; padding: 28px; grid-row: span 2;
+  }
+  .fl h3 {
+    font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700;
+    margin-bottom: 8px; color: var(--dark);
+  }
+  .fl h3 span { color: var(--accent); }
+  .fl p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .ftags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ftag {
+    padding: 8px 14px; background: var(--bg); border-radius: 8px;
+    font-size: 12px; font-weight: 500; color: var(--text);
+  }
+  .fr { background: var(--white); border-radius: 18px; padding: 22px; }
+  .fr h3 {
+    font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 700;
+    margin-bottom: 6px; color: var(--dark);
+  }
+  .fr p { color: var(--muted); font-size: 13px; }
+
+  /* TELEGRAM */
+  .tg-wrap { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .tg-inner {
+    max-width: 1160px; margin: 0 auto; padding: 52px 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+  }
+  .tg-vis { position: relative; height: 250px; }
+  .tg-card {
+    background: white; border-radius: 12px; padding: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.1); width: 170px;
+    position: absolute; top: 0; left: 0; z-index: 2;
+  }
+  .tg-phone {
+    background: #1c1c1e; border-radius: 20px; padding: 14px 12px; width: 190px;
+    position: absolute; bottom: 0; right: 0; z-index: 1; min-height: 210px;
+  }
+  .tg-ph-h { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .tg-av {
+    width: 30px; height: 30px; border-radius: 50%; background: #5a8a6a; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+  .tg-nm { font-size: 11px; font-weight: 600; color: white; }
+  .tg-sb { font-size: 10px; color: #8e8e93; }
+  .tg-bub {
+    background: #2c2c2e; border-radius: 9px 9px 9px 3px;
+    padding: 8px 10px; font-size: 11px; color: #e5e5ea; line-height: 1.5;
+  }
+  .tg-right h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 28px);
+    font-weight: 700; margin-bottom: 12px; color: var(--dark);
+  }
+  .tg-right p { color: var(--muted); margin-bottom: 18px; font-size: 14px; }
+  .tg-list { list-style: none; margin-bottom: 22px; }
+  .tg-list li { font-size: 14px; padding: 5px 0; display: flex; align-items: center; gap: 8px; }
+  .tg-list li::before { content: '✓'; color: var(--accent); font-weight: 700; }
+
+  /* PRICING */
+  .pricing-section { padding: 52px 20px; }
+  .pricing-section h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 36px);
+    font-weight: 700; text-align: center; margin-bottom: 6px; color: var(--dark);
+  }
+  .psub { text-align: center; color: var(--muted); margin-bottom: 32px; font-size: 14px; }
+  .pgrid {
+    max-width: 960px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start;
+  }
+  .pc { background: var(--white); border-radius: 18px; padding: 26px; position: relative; }
+  .pc.feat { background: var(--dark); color: white; }
+  .pbadge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--dark); color: white; border: 2px solid white;
+    font-size: 10px; font-weight: 700; padding: 3px 12px; border-radius: 20px; white-space: nowrap;
+  }
+  .pname { font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+  .pamount { font-family: 'Unbounded', sans-serif; font-size: 30px; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+  .pperiod { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .pc.feat .pperiod { color: #aaa; }
+  .pdesc {
+    font-size: 12px; color: var(--muted); margin-bottom: 14px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .pc.feat .pdesc { color: #ccc; border-color: #444; }
+  .pfeats { list-style: none; margin-bottom: 20px; }
+  .pfeats li { font-size: 12px; padding: 4px 0; display: flex; align-items: center; gap: 7px; }
+  .pfeats li::before { content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+  .pmore { font-size: 12px; color: var(--accent); cursor: pointer; margin-bottom: 18px; }
+  .pbtn {
+    display: block; width: 100%; padding: 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; cursor: pointer; text-align: center;
+    font-family: 'Golos Text', sans-serif; transition: all .2s;
+    border: 1.5px solid var(--border); background: transparent; color: var(--dark);
+  }
+  .pbtn:hover { border-color: var(--dark); }
+  .pc.feat .pbtn { background: white; color: var(--dark); border-color: white; }
+
+  /* CTA */
+  .cta-section {
+    padding: 52px 20px; text-align: center;
+    background: var(--card-bg); border-top: 1px solid var(--border);
+  }
+  .cta-section h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 32px);
+    font-weight: 700; margin-bottom: 10px; color: var(--dark);
+  }
+  .cta-section p { color: var(--muted); margin-bottom: 26px; font-size: 14px; }
+  .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cta1 {
+    padding: 13px 26px; background: var(--white); color: var(--dark);
+    border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: 'Golos Text', sans-serif; transition: all .2s;
+  }
+  .cta1:hover { border-color: var(--dark); }
+  .cta2 {
+    padding: 13px 26px; background: transparent; color: var(--accent);
+    border: 1.5px solid var(--accent); border-radius: 10px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: 'Golos Text', sans-serif; transition: all .2s;
+  }
+  .cta2:hover { background: var(--accent); color: white; }
+
+  /* FAQ */
+  .faq-section { padding: 52px 20px; }
+  .faq-inner { max-width: 800px; margin: 0 auto; }
+  .faq-section h2 {
+    font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 32px);
+    font-weight: 700; text-align: center; margin-bottom: 26px; color: var(--dark);
+  }
+  .fitem {
+    background: white; border-radius: 12px; padding: 16px 18px;
+    margin-bottom: 10px; cursor: pointer;
+  }
+  .fq {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; font-weight: 500; gap: 12px;
+  }
+  .fq .arr { font-size: 15px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+  .fitem.open .fq .arr { transform: rotate(180deg); }
+  .fa { margin-top: 10px; font-size: 13px; color: var(--accent); line-height: 1.6; display: none; }
+  .fitem.open .fa { display: block; }
+
+  /* FOOTER */
+  footer { background: var(--bg); border-top: 1px solid var(--border); padding: 36px 20px 18px; }
+  .foot-grid {
+    max-width: 1160px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 24px;
+  }
+  .foot-logo {
+    font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700;
+    color: var(--dark); margin-bottom: 8px; display: block; text-decoration: none;
+  }
+  .foot-desc { font-size: 13px; color: var(--accent); margin-bottom: 12px; }
+  .foot-info { font-size: 12px; color: var(--muted); line-height: 1.9; }
+  .foot-info a { color: var(--accent); text-decoration: none; }
+  .foot-soc { display: flex; gap: 7px; margin-top: 12px; }
+  .soc {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--dark); color: white; display: flex; align-items: center;
+    justify-content: center; font-size: 10px; font-weight: 700;
+    text-decoration: none; cursor: pointer; transition: background .2s;
+  }
+  .soc:hover { background: #444; }
+  .foot-col h4 {
+    font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .foot-col a { display: block; font-size: 13px; color: var(--accent); text-decoration: none; margin-bottom: 7px; }
+  .foot-col a:hover { text-decoration: underline; }
+  .foot-bottom {
+    max-width: 1160px; margin: 0 auto;
+    border-top: 1px solid var(--border); padding-top: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .foot-bottom span { font-size: 12px; color: var(--muted); }
+  .foot-bottom a { font-size: 12px; color: var(--accent); text-decoration: none; }
+  .foot-bottom a:hover { text-decoration: underline; }
+
+  /* ===== CHAT ===== */
+  #chat-toggle {
+    position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--dark); color: white; border: none; cursor: pointer;
+    font-size: 20px; box-shadow: 0 4px 20px rgba(0,0,0,.25);
+    display: flex; align-items: center; justify-content: center; transition: all .3s;
+  }
+  #chat-toggle:hover { transform: scale(1.08); background: #333; }
+  #chat-win {
+    position: fixed; bottom: 84px; right: 20px; z-index: 999;
+    width: min(360px, calc(100vw - 32px));
+    height: min(500px, calc(100vh - 104px));
+    background: white; border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.18);
+    display: flex; flex-direction: column; overflow: hidden;
+    transform: scale(.95) translateY(10px); opacity: 0; pointer-events: none;
+    transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  #chat-win.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+  .ch-head {
+    background: var(--dark); color: white; padding: 13px 16px;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .ch-av {
+    width: 32px; height: 32px; border-radius: 50%; background: #4a7a9b;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .ch-info h4 { font-size: 13px; font-weight: 600; }
+  .ch-info span { font-size: 11px; color: #10b981; }
+  .ch-close {
+    margin-left: auto; background: none; border: none;
+    color: #aaa; cursor: pointer; font-size: 16px; line-height: 1; padding: 4px;
+  }
+  .ch-close:hover { color: white; }
+  .ch-msgs {
+    flex: 1; overflow-y: auto; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px; background: #f8f7f5;
+  }
+  .ch-msgs::-webkit-scrollbar { width: 3px; }
+  .ch-msgs::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+  .msg {
+    max-width: 82%; padding: 9px 13px; border-radius: 14px;
+    font-size: 13px; line-height: 1.5; animation: msgIn .2s ease;
+  }
+  @keyframes msgIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+  .msg.bot {
+    background: white; color: var(--text);
+    border-radius: 4px 14px 14px 14px; align-self: flex-start;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .msg.user {
+    background: var(--dark); color: white;
+    border-radius: 14px 14px 4px 14px; align-self: flex-end;
+  }
+  .msg.typing { padding: 13px; }
+  .tdots { display: flex; gap: 4px; }
+  .tdots span {
+    width: 6px; height: 6px; border-radius: 50%; background: #bbb; animation: dot 1.4s infinite;
+  }
+  .tdots span:nth-child(2) { animation-delay: .2s; }
+  .tdots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes dot { 0%,80%,100%{transform:scale(1);opacity:.5}40%{transform:scale(1.3);opacity:1} }
+  .ch-input-row {
+    padding: 10px 13px; background: white; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
+  }
+  #ch-input {
+    flex: 1; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 9px 12px; font-size: 13px; font-family: 'Golos Text', sans-serif;
+    resize: none; outline: none; line-height: 1.4;
+    background: var(--bg); color: var(--text);
+    transition: border-color .2s; max-height: 90px; overflow-y: auto;
+  }
+  #ch-input:focus { border-color: var(--dark); }
+  #ch-input::placeholder { color: #bbb; }
+  #ch-send {
+    width: 36px; height: 36px; flex-shrink: 0; background: var(--dark); color: white;
+    border: none; border-radius: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: background .2s;
+  }
+  #ch-send:hover { background: #333; }
+  #ch-send:disabled { background: #ccc; cursor: default; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 860px) {
+    .nav-links, .nav-actions { display: none; }
+    .burger { display: flex; }
+
+    .hero-cards { grid-template-columns: 1fr; }
+    .mission-top { grid-template-columns: 1fr; gap: 16px; }
+    .feat3 { grid-template-columns: 1fr; }
+    .mkt-inner { grid-template-columns: 1fr; padding: 36px 20px; }
+    .stack { margin-top: 8px; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .fl { grid-row: span 1; }
+    .tg-inner { grid-template-columns: 1fr; padding: 36px 20px; }
+    .tg-vis { margin-bottom: 20px; }
+    .pgrid { grid-template-columns: 1fr; max-width: 380px; }
+    .foot-grid { grid-template-columns: 1fr; gap: 24px; }
+    .foot-bottom { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding: 32px 16px 28px; }
+    .mission { padding: 32px 16px; }
+    .features-section { padding: 32px 16px; }
+    .mkt-inner { padding: 32px 16px; }
+    .tg-inner { padding: 32px 16px; }
+    .pricing-section { padding: 32px 16px; }
+    .cta-section { padding: 36px 16px; }
+    .faq-section { padding: 32px 16px; }
+    footer { padding: 28px 16px 14px; }
+    .cta-btns { flex-direction: column; align-items: center; }
+    .cta-btns button { width: 100%; max-width: 280px; }
+    .tg-vis { height: 200px; }
+    .tg-card { width: 150px; }
+    .tg-phone { width: 165px; min-height: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">SpellBook</a>
+
+  <ul class="nav-links">
+    <li><a href="#" class="active">Главная</a></li>
+    <li><a href="#" class="mkt">Маркетплейс ⚡</a></li>
+    <li><a href="#">О нас</a></li>
+    <li><a href="#">Возможности</a></li>
+    <li><a href="#pricing">Тарифы</a></li>
+    <li><a href="#">Обучение</a></li>
+    <li><a href="#">Форум <span class="nav-badge">NEW</span></a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button class="btn-outline">Вход</button>
+    <button class="btn-primary">Регистрация</button>
+  </div>
+
+  <button class="burger" id="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mob-menu">
+  <a href="#" onclick="closeMenu()">Главная</a>
+  <a href="#" class="mkt" onclick="closeMenu()">Маркетплейс ⚡</a>
+  <a href="#" onclick="closeMenu()">О нас</a>
+  <a href="#" onclick="closeMenu()">Возможности</a>
+  <a href="#pricing" onclick="closeMenu()">Тарифы</a>
+  <a href="#" onclick="closeMenu()">Обучение</a>
+  <a href="#" onclick="closeMenu()">Форум <span class="nav-badge">NEW</span></a>
+  <div class="mob-btns">
+    <button class="btn-outline" onclick="closeMenu()">Вход</button>
+    <button class="btn-primary" onclick="closeMenu()">Регистрация</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Создавайте ассистентов на базе искусственного интеллекта</h1>
+  <p>Платформа для создания, настройки и монетизации умных помощников на базе ChatGPT 5.2</p>
+  <div class="hero-cards">
+    <div class="hero-card">
+      <span class="hero-tag">МАРКЕТПЛЕЙС</span>
+      <h2>Познакомьтесь с Маркетплейсом</h2>
+      <p>Готовые ассистенты для любых задач. Используйте бесплатно или создайте свой.</p>
+      <a href="#" class="btn-dark">Открыть маркетплейс</a>
+    </div>
+    <div class="hero-card">
+      <span class="hero-tag">AI</span>
+      <h2>Попробуйте ChatGPT 5.2</h2>
+      <p>Самая мощная модель ИИ теперь доступна всем пользователям платформы.</p>
+      <button class="btn-border" onclick="openChat()">Попробовать сейчас</button>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="mission">
+  <div class="mission-top">
+    <h2>В SpellBook мы создаем ИИ для долгосрочного благополучия человека.</h2>
+    <p>Хотя никто не может предвидеть все последствия развития ИИ, мы знаем, что создание мощных технологий требует как смелых шагов вперед, так и осознанных пауз для оценки эффектов.</p>
+  </div>
+  <div class="feat3">
+    <div class="feat3-card">
+      <div class="icon">📄</div>
+      <h3>Создавайте</h3>
+      <p>Настройте характер, знания и навыки вашего ИИ-помощника за несколько минут</p>
+    </div>
+    <div class="feat3-card">
+      <div class="icon">🔗</div>
+      <h3>Интегрируйте</h3>
+      <p>Telegram-боты, виджеты для сайта — подключайте ассистентов куда угодно</p>
+    </div>
+    <div class="feat3-card">
+      <div class="icon">💰</div>
+      <h3>Зарабатывайте</h3>
+      <p>Зарабатывайте через партнерскую программу или продавайте ассистентов на маркетплейсе</p>
+    </div>
+  </div>
+</section>
+
+<!-- MARKETPLACE -->
+<div class="mkt-wrap">
+  <div class="mkt-inner">
+    <div>
+      <h2>Маркетплейс готовых решений</h2>
+      <p>Сотни ассистентов для бизнеса, образования, творчества и повседневных задач. Используйте готовых ассистентов или создайте уникального.</p>
+      <a href="#" class="btn-black">Исследовать маркетплейс →</a>
+    </div>
+    <div class="stack">
+      <div class="sc">
+        <div class="sc-h">
+          <div class="sc-av" style="background:#10a37f;">G</div>
+          <div><div class="sc-t">ChatGPT</div><span class="sc-b">Другое</span></div>
+        </div>
+        <div class="sc-d">Стандартный ChatGPT модель 4o</div>
+        <div class="sc-s">★★★★★ (2)</div>
+      </div>
+      <div class="sc" style="top:8px;left:50px;">
+        <div class="sc-h">
+          <div class="sc-av" style="background:#7c4dff;">A</div>
+          <div><div class="sc-t">Аналитик</div><span class="sc-b" style="background:#f0e6ff;color:#7c4dff;">Бизнес</span></div>
+        </div>
+        <div class="sc-d">Анализирует данные и строит отчёты...</div>
+        <div class="sc-s">★★★★☆ (14)</div>
+      </div>
+      <div class="sc" style="top:0;left:100px;">
+        <div class="sc-h">
+          <div class="sc-av" style="background:#e87040;">K</div>
+          <div><div class="sc-t">Копирайтер</div><span class="sc-b" style="background:#fef0e6;color:#e87040;">Маркетинг</span></div>
+        </div>
+        <div class="sc-d">Пишет тексты для соц. сетей...</div>
+        <div class="sc-s">★★★★★ (31)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <h2>Все, что нужно для работы с ИИ</h2>
+  <div class="feat-grid">
+    <div class="fl">
+      <h3>Последняя модель <span>ChatGPT</span></h3>
+      <p>Используйте ChatGPT-5.2, в связке с другими технологиями. Мы постоянно добавляем новые функции.</p>
+      <div class="ftags">
+        <span class="ftag">GPT-5.2</span>
+        <span class="ftag">Telegram интеграции</span>
+        <span class="ftag">Базы знаний</span>
+        <span class="ftag">Распознавание аудио</span>
+      </div>
+    </div>
+    <div class="fr">
+      <h3>База знаний</h3>
+      <p>Загружайте документы, таблицы и файлы. Ассистент изучит их и будет использовать в ответах.</p>
+    </div>
+    <div class="fr">
+      <h3>Интеграция с сайтом</h3>
+      <p>Интегрируйте вашего ассистента на сайт с помощью виджета чата и настраивайте его под ваши задачи.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TELEGRAM -->
+<div class="tg-wrap">
+  <div class="tg-inner">
+    <div class="tg-vis">
+      <div class="tg-card">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#5a8a6a;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:11px;flex-shrink:0;">И</div>
+          <div>
+            <div style="font-size:11px;font-weight:600;">Илон Маск</div>
+            <span style="font-size:9px;background:#f0f4ff;color:#4a6dab;padding:1px 5px;border-radius:4px;">Другое</span>
+          </div>
+        </div>
+        <div style="font-size:10px;color:#888;margin-bottom:4px;">Здравствуйте! Я — ваш виртуальный Илон Маск...</div>
+        <div style="color:#f5a623;font-size:10px;">★★★★★ (1)</div>
+      </div>
+      <div class="tg-phone">
+        <div class="tg-ph-h">
+          <div class="tg-av">И</div>
+          <div><div class="tg-nm">Илон Маск</div><div class="tg-sb">БОТ</div></div>
+        </div>
+        <div class="tg-bub">Здравствуйте! Я — ваш виртуальный Илон Маск, основатель SpaceX и Tesla...</div>
+      </div>
+    </div>
+    <div class="tg-right">
+      <h2>Telegram-боты за 1 клик</h2>
+      <p>Превратите ассистента в полноценного Telegram-бота. Общайтесь сами или предоставьте доступ клиентам и подписчикам.</p>
+      <ul class="tg-list">
+        <li>Мгновенная активация без кода</li>
+        <li>Поддержка групп и каналов</li>
+        <li>Работа с файлами и изображениями</li>
+      </ul>
+      <button class="btn-dark" style="display:inline-block;width:auto;padding:13px 22px;">Создать Telegram-бота</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <h2>Простые и прозрачные тарифы</h2>
+  <p class="psub">Выберите тариф под ваши задачи</p>
+  <div class="pgrid">
+    <div class="pc">
+      <div class="pname">Про</div>
+      <div class="pamount">2 990₽</div>
+      <div class="pperiod">в месяц</div>
+      <div class="pdesc">Полный доступ ко всем возможностям платформы</div>
+      <ul class="pfeats">
+        <li>25 генераций изображений</li>
+        <li>4 совещания в месяц</li>
+        <li>4 веб-поиска в месяц</li>
+        <li>Без лимита сообщений</li>
+        <li>Telegram-интеграция</li>
+      </ul>
+      <div class="pmore">Подробнее ∨</div>
+      <button class="pbtn">Выбрать Pro</button>
+    </div>
+    <div class="pc feat">
+      <span class="pbadge">РЕКОМЕНДУЕМ</span>
+      <div class="pname">Премиум</div>
+      <div class="pamount">5 990₽</div>
+      <div class="pperiod">в месяц</div>
+      <div class="pdesc">Оптимальный выбор для активных пользователей</div>
+      <ul class="pfeats" style="color:white;">
+        <li>75 генераций изображений</li>
+        <li>20 совещаний в месяц</li>
+        <li>20 веб-поисков в месяц</li>
+        <li>Без лимита сообщений</li>
+        <li>Telegram-интеграция</li>
+      </ul>
+      <div class="pmore" style="color:#aaa;">Подробнее ∨</div>
+      <button class="pbtn">Выбрать Премиум</button>
+    </div>
+    <div class="pc">
+      <div class="pname">Партнер</div>
+      <div class="pamount">9 900₽</div>
+      <div class="pperiod">в месяц</div>
+      <div class="pdesc">Станьте нашим партнером и зарабатывайте на рекомендациях</div>
+      <ul class="pfeats">
+        <li>200 генераций изображений</li>
+        <li>60 совещаний в месяц</li>
+        <li>60 веб-поисков в месяц</li>
+        <li>Без лимита сообщений</li>
+        <li>Доступ к партнерской программе</li>
+      </ul>
+      <div class="pmore">Подробнее ∨</div>
+      <button class="pbtn">Стать партнером</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Начните создавать будущее уже сегодня</h2>
+  <p>Присоединяйтесь к тысячам пользователей, которые уже создают и используют ИИ-ассистентов для решения своих задач</p>
+  <div class="cta-btns">
+    <button class="cta1">Начать бесплатно</button>
+    <button class="cta2">Посмотреть примеры</button>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-inner">
+    <h2>Частые вопросы</h2>
+    <div class="fitem open" onclick="toggleFaq(this)">
+      <div class="fq">Что такое ИИ-ассистент? <span class="arr">⌃</span></div>
+      <div class="fa">ИИ-ассистент — это программа на базе нейросети, которая понимает естественный язык и может выполнять различные задачи: отвечать на вопросы, помогать с текстами, анализировать данные и многое другое.</div>
+    </div>
+    <div class="fitem" onclick="toggleFaq(this)">
+      <div class="fq">Нужны ли технические знания для создания ассистента? <span class="arr">⌃</span></div>
+      <div class="fa">Нет, платформа SpellBook позволяет создавать ассистентов без программирования. Весь процесс происходит через простой визуальный интерфейс.</div>
+    </div>
+    <div class="fitem" onclick="toggleFaq(this)">
+      <div class="fq">Могу ли я продавать своих ассистентов? <span class="arr">⌃</span></div>
+      <div class="fa">Да, вы можете публиковать ассистентов на маркетплейсе и получать доход от их использования другими пользователями.</div>
+    </div>
+    <div class="fitem" onclick="toggleFaq(this)">
+      <div class="fq">Какие модели ИИ доступны? <span class="arr">⌃</span></div>
+      <div class="fa">Мы предоставляем доступ к последним версиям ChatGPT. Список постоянно обновляется.</div>
+    </div>
+    <div class="fitem" onclick="toggleFaq(this)">
+      <div class="fq">Есть ли API для интеграции? <span class="arr">⌃</span></div>
+      <div class="fa">Нет, мы НЕ предоставляем REST API для интеграции ассистентов.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-grid">
+    <div>
+      <a href="#" class="foot-logo">SpellBook</a>
+      <div class="foot-desc">Конструктор умных ассистентов на базе нейросетей.</div>
+      <div class="foot-info">
+        ИП Хасанов Вадим Ринатович<br>ИНН: 860305730570<br>
+        ОГРНИП: 32516900135623<br>
+        Email: <a href="mailto:info@spell-book.net">info@spell-book.net</a><br>
+        Индекс: 420076
+      </div>
+      <div class="foot-soc">
+        <a class="soc" href="#">✈</a>
+        <a class="soc" href="#">▶</a>
+        <a class="soc" href="#">R</a>
+        <a class="soc" href="#">+</a>
+        <a class="soc" href="#">ВК</a>
+      </div>
+    </div>
+    <div class="foot-col">
+      <h4>Компания</h4>
+      <a href="#">Обучение</a><a href="#">О нас</a><a href="#">Блог</a><a href="#">Контакты</a>
+    </div>
+    <div class="foot-col">
+      <h4>Ресурсы</h4>
+      <a href="#">Документация</a><a href="#">Центр поддержки</a>
+      <a href="#">Политика конфиденциальности</a><a href="#">Условия использования</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 SpellBook. Все права защищены. Версия: 1.88.2</span>
+    <div style="display:flex;gap:18px;">
+      <a href="#">Публичная оферта</a>
+      <a href="#">Партнерский договор</a>
+    </div>
+  </div>
+</footer>
+
+<!-- CHAT WIDGET -->
+<button id="chat-toggle" title="Открыть чат">💬</button>
+
+<div id="chat-win">
+  <div class="ch-head">
+    <div class="ch-av">🤖</div>
+    <div class="ch-info">
+      <h4>SpellBook Ассистент</h4>
+      <span>● Онлайн</span>
+    </div>
+    <button class="ch-close" onclick="closeChat()">✕</button>
+  </div>
+  <div class="ch-msgs" id="ch-msgs">
+    <div class="msg bot">Привет! Я ИИ-ассистент SpellBook 👋 Чем могу помочь?</div>
+  </div>
+  <div class="ch-input-row">
+    <textarea id="ch-input" placeholder="Напишите сообщение..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="ch-send" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<script>
+/* ===== MENU ===== */
+let menuOpen = false;
+function toggleMenu() {
+  menuOpen = !menuOpen;
+  document.getElementById('mob-menu').classList.toggle('open', menuOpen);
+  document.getElementById('burger').classList.toggle('open', menuOpen);
+  document.body.style.overflow = menuOpen ? 'hidden' : '';
+}
+function closeMenu() {
+  menuOpen = false;
+  document.getElementById('mob-menu').classList.remove('open');
+  document.getElementById('burger').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ===== FAQ ===== */
+function toggleFaq(el) { el.classList.toggle('open'); }
+
+/* ===== CHAT ===== */
+let chatOpen = false;
+const togBtn = document.getElementById('chat-toggle');
+
+togBtn.addEventListener('click', () => { chatOpen ? closeChat() : openChat(); });
+
+function openChat() {
+  chatOpen = true;
+  document.getElementById('chat-win').classList.add('open');
+  togBtn.textContent = '✕';
+  setTimeout(() => document.getElementById('ch-input').focus(), 300);
+}
+function closeChat() {
+  chatOpen = false;
+  document.getElementById('chat-win').classList.remove('open');
+  togBtn.textContent = '💬';
+}
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+function addMsg(text, role) {
+  const c = document.getElementById('ch-msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.textContent = text;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+function showTyping() {
+  const c = document.getElementById('ch-msgs');
+  const d = document.createElement('div');
+  d.className = 'msg bot typing'; d.id = 'typing';
+  d.innerHTML = '<div class="tdots"><span></span><span></span><span></span></div>';
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const e = document.getElementById('typing'); if (e) e.remove(); }
+
+const SYSTEM = `Ты — ИИ-ассистент платформы SpellBook (spell-book.net). SpellBook — платформа для создания, настройки и монетизации ИИ-ассистентов на базе ChatGPT.
+Возможности: создание ИИ-ассистентов без кода, маркетплейс, Telegram-интеграция, базы знаний, виджет для сайта.
+Тарифы: Про (2990₽/мес), Премиум (5990₽/мес — рекомендуется), Партнер (9900₽/мес).
+Отвечай по-русски, кратко и дружелюбно.`;
+
+const history = [];
+
+async function sendMsg() {
+  const inp = document.getElementById('ch-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; inp.style.height = 'auto';
+  document.getElementById('ch-send').disabled = true;
+  addMsg(text, 'user');
+  history.push({ role: 'user', content: text });
+  showTyping();
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: history
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.map(b => b.text || '').join('') || 'Произошла ошибка.';
+    history.push({ role: 'assistant', content: reply });
+    addMsg(reply, 'bot');
+  } catch {
+    removeTyping();
+    addMsg('Ошибка соединения. Попробуйте позже.', 'bot');
+  }
+  document.getElementById('ch-send').disabled = false;
+  inp.focus();
+}
+</script>
+</body>
+</html>
