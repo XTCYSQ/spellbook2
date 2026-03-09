@@ -246,31 +246,100 @@
   /* TELEGRAM */
   .tg-wrap { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .tg-inner {
-    max-width: 1160px; margin: 0 auto; padding: 52px 20px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+    max-width: 1160px; margin: 0 auto; padding: 60px 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
   }
-  .tg-vis { position: relative; height: 250px; }
-  .tg-card {
-    background: white; border-radius: 12px; padding: 14px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.1); width: 170px;
-    position: absolute; top: 0; left: 0; z-index: 2;
+
+  /* NEW telegram visual */
+  .tg-vis {
+    position: relative; display: flex; align-items: flex-end; gap: 16px;
+    min-height: 300px;
+  }
+  .tg-assistant-card {
+    background: white; border-radius: 16px; padding: 18px;
+    box-shadow: 0 6px 28px rgba(0,0,0,.10); width: 175px; flex-shrink: 0;
+    align-self: flex-start; margin-top: 24px;
+    border: 1px solid var(--border);
+  }
+  .tg-ac-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .tg-ac-av {
+    width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#5a8a6a,#3d6b52);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 15px; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(90,138,106,.35);
+  }
+  .tg-ac-name { font-size: 12px; font-weight: 700; color: var(--dark); line-height: 1.3; }
+  .tg-ac-tag {
+    font-size: 9px; background: #f0f4ff; color: #4a6dab;
+    padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px;
+  }
+  .tg-ac-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
+  .tg-ac-stars { color: #f5a623; font-size: 12px; letter-spacing: 1px; }
+  .tg-ac-users { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  .tg-phone-wrap {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    position: relative;
   }
   .tg-phone {
-    background: #1c1c1e; border-radius: 20px; padding: 14px 12px; width: 190px;
-    position: absolute; bottom: 0; right: 0; z-index: 1; min-height: 210px;
+    background: #17212b; border-radius: 28px; padding: 0; width: 220px;
+    box-shadow: 0 12px 48px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.05);
+    overflow: hidden;
   }
-  .tg-ph-h { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .tg-av {
-    width: 30px; height: 30px; border-radius: 50%; background: #5a8a6a; flex-shrink: 0;
+  .tg-statusbar {
+    background: #17212b; padding: 10px 16px 6px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .tg-statusbar-time { font-size: 11px; color: #aaa; font-weight: 600; }
+  .tg-statusbar-icons { font-size: 10px; color: #aaa; }
+  .tg-chat-header {
+    background: #17212b; padding: 8px 14px 12px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .tg-chat-av {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg,#5a8a6a,#3d6b52); flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white;
+    color: white; font-weight: 800; font-size: 13px;
   }
-  .tg-nm { font-size: 11px; font-weight: 600; color: white; }
-  .tg-sb { font-size: 10px; color: #8e8e93; }
-  .tg-bub {
-    background: #2c2c2e; border-radius: 9px 9px 9px 3px;
-    padding: 8px 10px; font-size: 11px; color: #e5e5ea; line-height: 1.5;
+  .tg-chat-name { font-size: 13px; font-weight: 600; color: #e9e9e9; }
+  .tg-chat-online { font-size: 11px; color: #5ac8fa; }
+  .tg-messages { padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; min-height: 160px; background: #0e1621; }
+  .tg-msg-in {
+    background: #182533; border-radius: 4px 12px 12px 12px;
+    padding: 8px 11px; max-width: 80%;
+    font-size: 11px; color: #e9e9e9; line-height: 1.5;
+    align-self: flex-start;
   }
+  .tg-msg-out {
+    background: #2b5278; border-radius: 12px 12px 4px 12px;
+    padding: 8px 11px; max-width: 75%;
+    font-size: 11px; color: #e9e9e9; line-height: 1.5;
+    align-self: flex-end;
+  }
+  .tg-msg-time { font-size: 9px; color: #8d9aab; margin-top: 3px; text-align: right; }
+  .tg-input-bar {
+    background: #17212b; padding: 8px 10px;
+    display: flex; align-items: center; gap: 8px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .tg-input-field {
+    flex: 1; background: #242f3d; border-radius: 20px; padding: 7px 12px;
+    font-size: 11px; color: #8d9aab;
+  }
+  .tg-input-send {
+    width: 28px; height: 28px; border-radius: 50%; background: #5288c1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: white; flex-shrink: 0;
+  }
+
+  /* Arrow decoration */
+  .tg-arrow {
+    position: absolute; bottom: 30px; left: 155px;
+    width: 60px; height: 60px; pointer-events: none; opacity: .6;
+  }
+
   .tg-right h2 {
     font-family: 'Unbounded', sans-serif; font-size: clamp(18px, 3vw, 28px);
     font-weight: 700; margin-bottom: 12px; color: var(--dark);
@@ -499,7 +568,9 @@
     .feat-grid { grid-template-columns: 1fr; }
     .fl { grid-row: span 1; }
     .tg-inner { grid-template-columns: 1fr; padding: 36px 20px; }
-    .tg-vis { margin-bottom: 20px; }
+    .tg-vis { margin-bottom: 24px; min-height: 240px; }
+    .tg-phone { width: 195px; }
+    .tg-assistant-card { width: 155px; }
     .pgrid { grid-template-columns: 1fr; max-width: 380px; }
     .foot-grid { grid-template-columns: 1fr; gap: 24px; }
     .foot-bottom { flex-direction: column; align-items: flex-start; }
@@ -517,9 +588,9 @@
     footer { padding: 28px 16px 14px; }
     .cta-btns { flex-direction: column; align-items: center; }
     .cta-btns button { width: 100%; max-width: 280px; }
-    .tg-vis { height: 200px; }
-    .tg-card { width: 150px; }
-    .tg-phone { width: 165px; min-height: 180px; }
+    .tg-vis { min-height: 220px; }
+    .tg-phone { width: 185px; }
+    .tg-assistant-card { width: 145px; padding: 14px; }
   }
 </style>
 </head>
@@ -675,25 +746,62 @@
 <div class="tg-wrap">
   <div class="tg-inner">
     <div class="tg-vis">
-      <div class="tg-card">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:#5a8a6a;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:11px;flex-shrink:0;">И</div>
+      <!-- Assistant card -->
+      <div class="tg-assistant-card">
+        <div class="tg-ac-top">
+          <div class="tg-ac-av">И</div>
           <div>
-            <div style="font-size:11px;font-weight:600;">Илон Маск</div>
-            <span style="font-size:9px;background:#f0f4ff;color:#4a6dab;padding:1px 5px;border-radius:4px;">Другое</span>
+            <div class="tg-ac-name">Илон Маск</div>
+            <span class="tg-ac-tag">Другое</span>
           </div>
         </div>
-        <div style="font-size:10px;color:#888;margin-bottom:4px;">Здравствуйте! Я — ваш виртуальный Илон Маск...</div>
-        <div style="color:#f5a623;font-size:10px;">★★★★★ (1)</div>
+        <div class="tg-ac-desc">Здравствуйте! Я — ваш виртуальный Илон Маск...</div>
+        <div class="tg-ac-stars">★★★★★</div>
+        <div class="tg-ac-users">👥 47 пользователей</div>
       </div>
-      <div class="tg-phone">
-        <div class="tg-ph-h">
-          <div class="tg-av">И</div>
-          <div><div class="tg-nm">Илон Маск</div><div class="tg-sb">БОТ</div></div>
+
+      <!-- Arrow -->
+      <svg class="tg-arrow" viewBox="0 0 60 60" fill="none">
+        <path d="M10 10 Q30 5 40 30 Q45 45 55 50" stroke="#c8622a" stroke-width="2" stroke-dasharray="4 3" fill="none" stroke-linecap="round"/>
+        <path d="M50 44 L55 50 L49 52" stroke="#c8622a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+
+      <!-- Telegram phone mockup -->
+      <div class="tg-phone-wrap">
+        <div class="tg-phone">
+          <div class="tg-statusbar">
+            <span class="tg-statusbar-time">9:41</span>
+            <span class="tg-statusbar-icons">●●● ▲</span>
+          </div>
+          <div class="tg-chat-header">
+            <div class="tg-chat-av">И</div>
+            <div>
+              <div class="tg-chat-name">Илон Маск</div>
+              <div class="tg-chat-online">● бот онлайн</div>
+            </div>
+          </div>
+          <div class="tg-messages">
+            <div class="tg-msg-in">
+              Здравствуйте! Я ваш виртуальный Илон Маск. Готов ответить на вопросы!
+              <div class="tg-msg-time">21:35 ✓✓</div>
+            </div>
+            <div class="tg-msg-out">
+              /start
+              <div class="tg-msg-time">21:35</div>
+            </div>
+            <div class="tg-msg-in">
+              Чем могу помочь сегодня? 🚀
+              <div class="tg-msg-time">21:36 ✓✓</div>
+            </div>
+          </div>
+          <div class="tg-input-bar">
+            <div class="tg-input-field">Сообщение...</div>
+            <div class="tg-input-send">➤</div>
+          </div>
         </div>
-        <div class="tg-bub">Здравствуйте! Я — ваш виртуальный Илон Маск, основатель SpaceX и Tesla...</div>
       </div>
     </div>
+
     <div class="tg-right">
       <h2>Telegram-боты за 1 клик</h2>
       <p>Превратите ассистента в полноценного Telegram-бота. Общайтесь сами или предоставьте доступ клиентам и подписчикам.</p>
@@ -807,7 +915,7 @@
       <div class="foot-info">
         ИП Хасанов Вадим Ринатович<br>ИНН: 860305730570<br>
         ОГРНИП: 32516900135623<br>
-        Email: <a href="mailto:info@spell-book.net">info@spell-book.net</a><br>
+        Email: <a href="/cdn-cgi/l/email-protection#c0a9aea6af80b3b0a5acaceda2afafabeeaea5b4"><span class="__cf_email__" data-cfemail="3d54535b527d4e4d585151105f52525613535849">[email&#160;protected]</span></a><br>
         Индекс: 420076
       </div>
       <div class="foot-soc">
@@ -859,7 +967,7 @@
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ===== MENU ===== */
 let menuOpen = false;
 function toggleMenu() {
@@ -919,10 +1027,27 @@ function showTyping() {
 }
 function removeTyping() { const e = document.getElementById('typing'); if (e) e.remove(); }
 
-const SYSTEM = `Ты — ИИ-ассистент платформы SpellBook (spell-book.net). SpellBook — платформа для создания, настройки и монетизации ИИ-ассистентов на базе ChatGPT.
-Возможности: создание ИИ-ассистентов без кода, маркетплейс, Telegram-интеграция, базы знаний, виджет для сайта.
-Тарифы: Про (2990₽/мес), Премиум (5990₽/мес — рекомендуется), Партнер (9900₽/мес).
-Отвечай по-русски, кратко и дружелюбно.`;
+const GEMINI_KEY = 'AIzaSyBPt7sokbydL3SFLSNoAsQNWRnDj2IVfTE';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+const SYSTEM_PROMPT = `Ты — умный и дружелюбный ИИ-ассистент платформы SpellBook (spell-book.net).
+
+SpellBook — платформа для создания, настройки и монетизации ИИ-ассистентов на базе ChatGPT без программирования.
+
+Возможности платформы:
+- Создание ИИ-ассистентов с нуля за несколько минут — настройка характера, знаний и навыков
+- Маркетплейс готовых ассистентов для бизнеса, образования, творчества
+- Telegram-интеграция за 1 клик
+- Базы знаний — загружать документы, файлы, таблицы
+- Виджет чата для любого сайта
+- Монетизация через партнёрскую программу и продажи ассистентов
+
+Тарифы:
+- Про — 2990 руб/мес: 25 генераций изображений, 4 совещания, 4 веб-поиска, безлимит сообщений
+- Премиум — 5990 руб/мес (рекомендуется): 75 генераций, 20 совещаний, 20 веб-поисков, поддержка до 5ч
+- Партнёр — 9900 руб/мес: 200 генераций, 60 совещаний, 60 веб-поисков, партнёрская программа, поддержка до 1ч
+
+Правила: отвечай только по-русски, кратко и дружелюбно. Если не знаешь — предложи написать на info@spell-book.net. Не выдумывай функции или цены.`;
 
 const history = [];
 
@@ -933,27 +1058,26 @@ async function sendMsg() {
   inp.value = ''; inp.style.height = 'auto';
   document.getElementById('ch-send').disabled = true;
   addMsg(text, 'user');
-  history.push({ role: 'user', content: text });
+  history.push({ role: 'user', parts: [{ text }] });
   showTyping();
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(GEMINI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM,
-        messages: history
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: history
       })
     });
     const data = await res.json();
     removeTyping();
-    const reply = data.content?.map(b => b.text || '').join('') || 'Произошла ошибка.';
-    history.push({ role: 'assistant', content: reply });
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text
+      || 'Извините, произошла ошибка. Попробуйте позже.';
+    history.push({ role: 'model', parts: [{ text: reply }] });
     addMsg(reply, 'bot');
-  } catch {
+  } catch (e) {
     removeTyping();
-    addMsg('Ошибка соединения. Попробуйте позже.', 'bot');
+    addMsg('Ошибка соединения. Проверьте интернет и попробуйте снова.', 'bot');
   }
   document.getElementById('ch-send').disabled = false;
   inp.focus();
